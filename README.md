@@ -1,7 +1,7 @@
 ===========================================
                  Sellit.
        Aplikasi Web Jual Beli Online
-
+===========================================
 Deskripsi:
 ----------
 Sellit. adalah aplikasi web berbasis e-commerce yang memungkinkan pengguna untuk menjual dan membeli produk secara online. Aplikasi ini dirancang agar mudah digunakan oleh pengguna umum dan pemilik usaha kecil untuk mengelola toko, menampilkan produk, dan memfasilitasi transaksi dengan aman.
