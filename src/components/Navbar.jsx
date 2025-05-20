@@ -51,7 +51,9 @@ function Navbar() {
                 <button className="flex items-center">
                   Account <span className="ml-1">▼</span>
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block text-gray-800">
+                <div className="absolute right-0 top-full w-48 bg-white rounded-md shadow-lg py-1
+                opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto
+                transition-opacity duration-200 text-gray-800">
                   <Link to="/account/wallet" className="block px-4 py-2 hover:bg-red-100">Wallet</Link>
                   <Link to="/account/orders" className="block px-4 py-2 hover:bg-red-100">Orders</Link>
                   <Link to="/seller" className="block px-4 py-2 hover:bg-red-100">Seller Dashboard</Link>
