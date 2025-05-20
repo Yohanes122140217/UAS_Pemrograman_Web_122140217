@@ -14,6 +14,8 @@ import OrdersPage from './pages/Account/Orders';
 import SellerPage from './pages/Seller/Page';
 import HelpPage from './pages/Help/Page';
 import NotFoundPage from './pages/NotFound/Page';
+import SignUpPage from './pages/SignUp/page';
+import LoginPage from './pages/Login/Page';
 
 function App() {
   return (
@@ -29,7 +31,9 @@ function App() {
         <Route path="/account/wallet" element={<WalletPage />} />   {/* Wallet */}  
         <Route path="/account/orders" element={<OrdersPage />} />   {/* Orders */}  
         <Route path="/seller" element={<SellerPage />} />           {/* Seller Dashboard */}  
-        <Route path="/help" element={<HelpPage />} />               {/* Help Center */} 
+        <Route path="/help" element={<HelpPage />} />               {/* Help Center */}
+        <Route path="/signup" element={<SignUpPage />} />           {/* Sign Up */} 
+        <Route path="/login" element={<LoginPage />} />           {/* Login */} 
         <Route path="*" element={<NotFoundPage />} />               {/* 404 */}  
       </Routes>
       <Footer />

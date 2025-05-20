@@ -22,7 +22,7 @@ function Navbar() {
               <input
                 type="text"
                 placeholder="Search products..."
-                className="w-full py-2 px-4 rounded-lg text-gray-800 focus:outline-none"
+                className="bg-white w-full py-2 px-4 rounded-lg text-gray-800 focus:outline-none"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -59,7 +59,8 @@ function Navbar() {
                   <Link to="/seller" className="block px-4 py-2 hover:bg-red-100">Seller Dashboard</Link>
                   <div className="border-t border-gray-200"></div>
                   <Link to="/help" className="block px-4 py-2 hover:bg-red-100">Help Center</Link>
-                  <Link to="/register" className="block px-4 py-2 hover:bg-red-100">Sign Up</Link>
+                  <Link to="/signup" className="block px-4 py-2 hover:bg-red-100">Sign Up</Link>
+                  <Link to="/login" className="block px-4 py-2 hover:bg-red-100">Login</Link>
                   <button className="block w-full text-left px-4 py-2 hover:bg-red-100">Log Out</button>
                 </div>
               </div>
