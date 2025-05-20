@@ -68,7 +68,7 @@ function Footer() {
         <div className="mt-8 pt-6 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
             <p className="text-sm text-gray-600">
-              © {new Date().getFullYear()} CollegeShop. All rights reserved.
+              © {new Date().getFullYear()} Sellit by Nero. All rights reserved.
             </p>
           </div>
           <div className="flex space-x-4">

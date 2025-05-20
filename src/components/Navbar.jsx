@@ -13,11 +13,11 @@ function Navbar() {
           {/* Logo */}
           <Link to="/" className="text-2xl font-bold flex items-center">
             <span className="mr-2">🛒</span>
-            <span>CollegeShop</span>
+            <span>Sellit.</span>
           </Link>
 
           {/* Search Bar - Hidden on mobile */}
-          <div className="hidden md:flex flex-1 mx-6">
+          <div className="hidden md:flex flex-1 mx-6 bg-w">
             <div className="relative w-full">
               <input
                 type="text"
@@ -42,21 +42,24 @@ function Navbar() {
             </Link>
             <div className="border-l border-red-400 h-6"></div>
             <div className="flex items-center">
-              <img 
+              {/* <img 
                 src="/api/placeholder/32/32" 
                 alt="User" 
                 className="w-8 h-8 rounded-full mr-2"
-              />
+              /> */}
               <div className="group relative">
-                <button className="flex items-center">
-                  Account <span className="ml-1">▼</span>
+                <button className="flex items-center" >
+                  My Account <span className="ml-1">▼</span>
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block text-gray-800">
+                <div className="absolute right-0 top-full w-48 bg-white rounded-md shadow-lg py-1
+                opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto
+                transition-opacity duration-200 text-gray-800">
                   <Link to="/account/wallet" className="block px-4 py-2 hover:bg-red-100">Wallet</Link>
                   <Link to="/account/orders" className="block px-4 py-2 hover:bg-red-100">Orders</Link>
                   <Link to="/seller" className="block px-4 py-2 hover:bg-red-100">Seller Dashboard</Link>
                   <div className="border-t border-gray-200"></div>
                   <Link to="/help" className="block px-4 py-2 hover:bg-red-100">Help Center</Link>
+                  <Link to="/register" className="block px-4 py-2 hover:bg-red-100">Sign Up</Link>
                   <button className="block w-full text-left px-4 py-2 hover:bg-red-100">Log Out</button>
                 </div>
               </div>
@@ -65,9 +68,7 @@ function Navbar() {
 
           {/* Mobile menu button */}
           <button 
-            className="md:hidden text-white"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
+            className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? '✕' : '☰'}
           </button>
         </div>
