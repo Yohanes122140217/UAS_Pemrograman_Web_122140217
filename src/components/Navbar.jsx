@@ -59,6 +59,7 @@ function Navbar() {
                   <Link to="/seller" className="block px-4 py-2 hover:bg-red-100">Seller Dashboard</Link>
                   <div className="border-t border-gray-200"></div>
                   <Link to="/help" className="block px-4 py-2 hover:bg-red-100">Help Center</Link>
+                  <Link to="/register" className="block px-4 py-2 hover:bg-red-100">Sign Up</Link>
                   <button className="block w-full text-left px-4 py-2 hover:bg-red-100">Log Out</button>
                 </div>
               </div>
