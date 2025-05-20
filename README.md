@@ -4,7 +4,8 @@
 =
 Deskripsi:
 ----------
-Sellit. adalah aplikasi web berbasis e-commerce yang memungkinkan pengguna untuk menjual dan membeli produk secara online. Aplikasi ini dirancang agar mudah digunakan oleh pengguna umum dan pemilik usaha kecil untuk mengelola toko, menampilkan produk, dan memfasilitasi transaksi dengan aman.
+Sellit. adalah aplikasi web berbasis e-commerce yang memungkinkan pengguna untuk menjual dan membeli produk secara online.
+Website ini dirancang agar mudah digunakan oleh mahasiswa ITERA untuk mengelola toko, menampilkan produk, dan memfasilitasi transaksi dengan aman.
 
 Fitur Aplikasi:
 ---------------
@@ -42,4 +43,3 @@ Berikut ini adalah beberapa package Python yang dibutuhkan oleh aplikasi ini aga
 - pyramid_jwt (untuk otentikasi berbasis token)
 - matplotlib, scipy, soundfile, pydub, audioread, dll (jika terdapat pemrosesan audio/visual)
 
-Kamu dapat menginstal seluruh dependensi dengan perintah:
