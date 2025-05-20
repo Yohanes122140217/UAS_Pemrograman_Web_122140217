@@ -43,6 +43,7 @@ function Navbar() {
             <div className="border-l border-red-400 h-6"></div>
             <div className="flex items-center">
               {/* <img 
+              {/* <img 
                 src="/api/placeholder/32/32" 
                 alt="User" 
                 className="w-8 h-8 rounded-full mr-2"
@@ -61,6 +62,7 @@ function Navbar() {
                   <Link to="/help" className="block px-4 py-2 hover:bg-red-100">Help Center</Link>
                   <Link to="/signup" className="block px-4 py-2 hover:bg-red-100">Sign Up</Link>
                   <Link to="/login" className="block px-4 py-2 hover:bg-red-100">Login</Link>
+                  <Link to="/register" className="block px-4 py-2 hover:bg-red-100">Sign Up</Link>
                   <button className="block w-full text-left px-4 py-2 hover:bg-red-100">Log Out</button>
                 </div>
               </div>
