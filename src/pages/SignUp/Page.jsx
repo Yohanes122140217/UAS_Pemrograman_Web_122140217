@@ -33,7 +33,12 @@ function SignUpPage() {
     // TODO: Replace with actual sign up logic (API call)
     setSuccess(true);
     setError("");
-    setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+    setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
   };
 
   return (
