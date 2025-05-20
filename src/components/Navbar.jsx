@@ -62,7 +62,6 @@ function Navbar() {
                   <Link to="/help" className="block px-4 py-2 hover:bg-red-100">Help Center</Link>
                   <Link to="/signup" className="block px-4 py-2 hover:bg-red-100">Sign Up</Link>
                   <Link to="/login" className="block px-4 py-2 hover:bg-red-100">Login</Link>
-                  <Link to="/register" className="block px-4 py-2 hover:bg-red-100">Sign Up</Link>
                   <button className="block w-full text-left px-4 py-2 hover:bg-red-100">Log Out</button>
                 </div>
               </div>
