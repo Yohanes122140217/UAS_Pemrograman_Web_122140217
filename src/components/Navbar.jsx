@@ -42,11 +42,11 @@ function Navbar() {
             </Link>
             <div className="border-l border-red-400 h-6"></div>
             <div className="flex items-center">
-              <img 
+              {/* <img 
                 src="/api/placeholder/32/32" 
                 alt="User" 
                 className="w-8 h-8 rounded-full mr-2"
-              />
+              /> */}
               <div className="group relative">
                 <button className="flex items-center">
                   Account <span className="ml-1">▼</span>
