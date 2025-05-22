@@ -41,5 +41,5 @@ Berikut ini adalah beberapa package Python yang dibutuhkan oleh aplikasi ini aga
 - yfinance (jika aplikasi terhubung ke data saham)
 - uvicorn / waitress (server WSGI/ASGI)
 - pyramid_jwt (untuk otentikasi berbasis token)
-- matplotlib, scipy, soundfile, pydub, audioread, dll (jika terdapat pemrosesan audio/visual)
+- pyramid_tm + zope (untuk menyusun commit ke database secara otomatis)
 
