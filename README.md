@@ -23,22 +23,18 @@ Fitur Aplikasi:
 5. Ulasan Produk
    - Pembeli dapat memberikan rating dan komentar
 6. Dashboard Admin
-   - Statistik penjualan, pengguna, dan produk (opsional)
+   - Statistik penjualan, pengguna, dan produk
 
 Dependensi:
 -----------
 Berikut ini adalah beberapa package Python yang dibutuhkan oleh aplikasi ini agar dapat berjalan:
 
-- Flask / FastAPI / Pyramid (tergantung implementasi framework)
-- SQLAlchemy
-- Alembic
-- Jinja2 / Chameleon (templating)
+- RESTfulAPI by pyramid-python
+- PostgreSQL (Database provider)
+- SQLAlchemy (ORM untuk managing database)
+- Alembic (untuk database schema versioning dan commit versions)
 - bcrypt / passlib (hashing password)
-- python-dotenv
-- pandas, numpy
-- matplotlib (jika menampilkan grafik)
-- opencv-python, librosa, mediapipe (jika ada pengolahan media)
-- yfinance (jika aplikasi terhubung ke data saham)
+- python-venv (untuk penyusunan environment)
 - uvicorn / waitress (server WSGI/ASGI)
 - pyramid_jwt (untuk otentikasi berbasis token)
 - pyramid_tm + zope (untuk menyusun commit ke database secara otomatis)
