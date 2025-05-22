@@ -1,0 +1,7 @@
+pyramid
+waitress
+SQLAlchemy
+psycopg2-binary
+transaction
+pyramid_tm
+marshmallow
