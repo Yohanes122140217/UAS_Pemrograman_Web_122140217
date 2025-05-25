@@ -1,15 +1,16 @@
-from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
-# from sqlalchemy.orm import relationship
+# backend/ecommerce/models/product.py
+from sqlalchemy import Column, Integer, String, Float, Text
 from .meta import Base
 
+# backend/ecommerce/models/product.py
 class Product(Base):
     __tablename__ = 'products'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(150), nullable=False)
-    description = Column(Text, nullable=True)
-    price = Column(Float, nullable=False)
-    stock = Column(Integer, default=0, nullable=False)
-    # category_id = Column(Integer, ForeignKey('categories.id'), nullable=True)  # assuming you have categories table
 
-    # Relationship example, assuming Category model exists
-    # category = relationship("Category", back_populates="products")
+    id             = Column(Integer, primary_key=True)
+    name           = Column(String(255), nullable=False)
+    description    = Column(Text, nullable=True)
+    price          = Column(Float, nullable=False)
+    original_price = Column(Float, nullable=True)
+    image_url      = Column(String(512), nullable=True)  # Image URL
+    rating         = Column(Float, default=0.0)
+    sold           = Column(Integer, default=0)

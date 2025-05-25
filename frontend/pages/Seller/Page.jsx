@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Bell, Package, DollarSign, Users, PieChart, Settings, HelpCircle, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // Sample data for the sales chart
 const salesData = [
@@ -208,11 +209,15 @@ function DashboardTab() {
 }
 
 function ProductsTab() {
+  const navigate = useNavigate();
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Products</h1>
-        <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+        <button
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          onClick={() => navigate('/add-product')}  // <-- Navigate on click
+        >
           Add New Product
         </button>
       </div>

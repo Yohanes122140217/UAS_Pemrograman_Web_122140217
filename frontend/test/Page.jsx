@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 
-export default function SignUp() {
-  const [form, setForm] = useState({ username: '', email: '', password: '' });
+export default function Test() {
+  const [form, setForm] = useState({
+    username: '',
+    email: '',
+    password:'',
+  });
   const [message, setMessage] = useState('');
 
   const handleChange = e => {
@@ -16,14 +20,15 @@ export default function SignUp() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
-      });
+      });``
       const data = await res.json();
       if (res.ok) {
         setMessage(data.message);
       } else {
         setMessage(data.error || 'Signup failed');
       }
-    } catch {
+    } 
+    catch {
       setMessage('Network error');
     }
   };
@@ -38,6 +43,8 @@ export default function SignUp() {
         <input name="email" type="email" value={form.email} onChange={handleChange} required /><br />
         <label>Password</label><br />
         <input name="password" type="password" value={form.password} onChange={handleChange} required /><br /><br />
+        {/* <label>Confirm Password</label><br />
+        <input name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} required /><br /><br /> */}
         <button type="submit">Sign Up</button>
       </form>
       <p>{message}</p>

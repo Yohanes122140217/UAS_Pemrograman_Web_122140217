@@ -1,49 +1,74 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { signUpUser } from "../../api/auth";
+// src/pages/SignUp/Page.jsx
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function SignUpPage() {
-  const [formData, setFormData] = useState({
-    name: "",
+  const navigate = useNavigate();
+
+  // 1️⃣ Redirect away if already logged in
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
+
+  const [form, setForm] = useState({
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { name, email, password, confirmPassword } = formData;
+    const { username, email, password, confirmPassword } = form;
 
-    if (!name || !email || !password || !confirmPassword) {
+    if (!username || !email || !password || !confirmPassword) {
       setError("Please fill in all fields.");
       return;
     }
-
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
-    try{
-      await signUpUser({ name, email, password, confirmPassword });
-      setSuccess(true);
-      setError("");
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
-    }
+    setError("");
+    setMessage("");
 
-    catch (err) {
+    try {
+      const res = await fetch("http://localhost:6543/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setSuccess(true);
+        setMessage(data.message || "Account created successfully!");
+        // Optionally auto-login:
+        const loginRes = await fetch("http://localhost:6543/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const loginBody = await loginRes.json();
+        if (loginRes.ok && loginBody.token) {
+          localStorage.setItem("token", loginBody.token);
+          navigate("/", { replace: true });
+        }
+      } else {
+        setError(data.error || "Signup failed");
+      }
+    } catch (err) {
       setError(err.message || "An error occurred. Please try again.");
     }
   };
@@ -59,12 +84,10 @@ function SignUpPage() {
         className="bg-white rounded-lg shadow-md p-6 space-y-5"
         noValidate
       >
-        {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded">{error}</div>
-        )}
+        {error && <div className="bg-red-100 text-red-700 p-3 rounded">{error}</div>}
         {success && (
           <div className="bg-green-100 text-green-700 p-3 rounded">
-            Account created successfully! You can now{" "}
+            {message} You can now{" "}
             <Link to="/login" className="text-red-600 underline">
               log in
             </Link>
@@ -73,49 +96,58 @@ function SignUpPage() {
         )}
 
         <div>
-          <label htmlFor="name" className="block mb-1 font-semibold text-gray-700">
-            Full Name
+          <label
+            htmlFor="username"
+            className="block mb-1 font-semibold text-gray-700"
+          >
+            Username
           </label>
           <input
-            id="name"
-            name="name"
+            id="username"
+            name="username"
             type="text"
-            value={formData.name}
+            value={form.username}
             onChange={handleChange}
-            placeholder="Usename"
-            className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+            placeholder="Username"
+            className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block mb-1 font-semibold text-gray-700">
+          <label
+            htmlFor="email"
+            className="block mb-1 font-semibold text-gray-700"
+          >
             Email Address
           </label>
           <input
             id="email"
             name="email"
             type="email"
-            value={formData.email}
+            value={form.email}
             onChange={handleChange}
             placeholder="Email"
-            className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+            className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block mb-1 font-semibold text-gray-700">
+          <label
+            htmlFor="password"
+            className="block mb-1 font-semibold text-gray-700"
+          >
             Password
           </label>
           <input
             id="password"
             name="password"
             type="password"
-            value={formData.password}
+            value={form.password}
             onChange={handleChange}
             placeholder="Enter a strong password"
-            className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+            className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
             required
           />
         </div>
@@ -131,10 +163,10 @@ function SignUpPage() {
             id="confirmPassword"
             name="confirmPassword"
             type="password"
-            value={formData.confirmPassword}
+            value={form.confirmPassword}
             onChange={handleChange}
             placeholder="Re-enter your password"
-            className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
+            className="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-600"
             required
           />
         </div>

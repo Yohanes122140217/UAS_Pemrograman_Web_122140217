@@ -7,4 +7,4 @@ register(DBSession)
 Base = declarative_base()
 
 from .user import User
-# from .product import Product
+from .product import Product
