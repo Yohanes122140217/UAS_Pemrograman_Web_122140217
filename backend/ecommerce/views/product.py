@@ -41,3 +41,24 @@ def create_product(request):
             status=500,
             content_type='application/json'
         )
+
+
+
+@view_config(route_name='get_products', renderer='json', request_method='GET')
+def products_api_view(request):
+    products = DBSession.query(Product).all()
+
+    # Serialize product objects into dictionaries
+    result = []
+    for p in products:
+        result.append({
+            'id': p.id,
+            'name': p.name,
+            'price': p.price,
+            'originalPrice': p.original_price,
+            'image': p.image_url or '/api/placeholder/300/200',
+            'rating': p.rating,
+            'sold': p.sold,
+        })
+
+    return result

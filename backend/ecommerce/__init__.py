@@ -64,7 +64,7 @@ def main(global_config, **settings):
     # ImageKit routes
     # config.add_route('list_products', '/api/products')
     config.add_route('create_product', '/api/products')
-
+    config.add_route('get_products', '/api/get-products')
     config.add_route('imagekit_auth', '/api/imagekit/auth')
 
     config.add_renderer('json', JSON())

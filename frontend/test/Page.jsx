@@ -1,53 +1,51 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { IKContext, IKUpload } from 'imagekitio-react';
 
-export default function Test() {
-  const [form, setForm] = useState({
-    username: '',
-    email: '',
-    password:'',
-  });
-  const [message, setMessage] = useState('');
+const publicKey = "public_/G/t0frWoOsGqqQ4fpDh0o8KfiY=";
+const urlEndpoint = "https://ik.imagekit.io/wc6bpahhv/";
 
-  const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setMessage('');
-    try {
-      const res = await fetch('http://localhost:6543/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });``
-      const data = await res.json();
-      if (res.ok) {
-        setMessage(data.message);
-      } else {
-        setMessage(data.error || 'Signup failed');
-      }
-    } 
-    catch {
-      setMessage('Network error');
+const authenticator = async () => {
+  try {
+    const response = await fetch("http://localhost:6543/api/imagekit/auth");
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Request failed with status ${response.status}: ${errorText}`);
     }
-  };
+    const data = await response.json();
+    const { signature, expire, token } = data;
+    return { signature, expire, token };
+  } catch (error) {
+    console.error("Authentication request failed:", error);
+    throw error;
+  }
+};
 
+const onError = (err) => {
+  console.error("Upload Error:", err);
+  alert("Upload failed! " + JSON.stringify(err));
+};
+
+const onSuccess = (res) => {
+  console.log("Upload Success:", res);
+  alert("Upload successful! URL: " + res.url);
+};
+
+export default function AddProductForm() {
   return (
-    <div style={{ maxWidth: 400, margin: 'auto' }}>
-      <h2>Sign Up</h2>
-      <form onSubmit={handleSubmit}>
-        <label>Username</label><br />
-        <input name="username" value={form.username} onChange={handleChange} required /><br />
-        <label>Email</label><br />
-        <input name="email" type="email" value={form.email} onChange={handleChange} required /><br />
-        <label>Password</label><br />
-        <input name="password" type="password" value={form.password} onChange={handleChange} required /><br /><br />
-        {/* <label>Confirm Password</label><br />
-        <input name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} required /><br /><br /> */}
-        <button type="submit">Sign Up</button>
-      </form>
-      <p>{message}</p>
-    </div>
+    <IKContext
+      publicKey={publicKey}
+      urlEndpoint={urlEndpoint}
+      authenticator={authenticator}  // async function that fetches fresh auth params
+    >
+      <div>
+        <h2>Upload an Image</h2>
+        <IKUpload
+          fileName={`test-upload-${Date.now()}`}
+          onError={onError}
+          onSuccess={onSuccess}
+          className="cursor-pointer px-4 py-2 border border-dashed border-gray-300 rounded-lg text-center text-gray-600 hover:border-red-600 hover:text-red-600 transition-colors"
+        />
+      </div>
+    </IKContext>
   );
 }

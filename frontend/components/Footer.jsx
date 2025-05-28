@@ -40,7 +40,7 @@ function Footer() {
 
           {/* About & Contact */}
           <div>
-            <h3 className="font-bold text-lg mb-4 text-red-600">About CollegeShop</h3>
+            <h3 className="font-bold text-lg mb-4 text-red-600">About Sellit.</h3>
             <p className="mb-4">Your one-stop shop for college essentials and more. Get the best deals for students!</p>
             <div className="flex space-x-4">
               <a href="#" className="text-red-600 hover:text-red-800">

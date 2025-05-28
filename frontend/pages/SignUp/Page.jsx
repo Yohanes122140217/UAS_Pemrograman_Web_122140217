@@ -51,22 +51,15 @@ function SignUpPage() {
       });
       const data = await res.json();
 
-      if (res.ok) {
-        setSuccess(true);
-        setMessage(data.message || "Account created successfully!");
-        // Optionally auto-login:
-        const loginRes = await fetch("http://localhost:6543/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        });
-        const loginBody = await loginRes.json();
-        if (loginRes.ok && loginBody.token) {
-          localStorage.setItem("token", loginBody.token);
-          navigate("/", { replace: true });
+      if (!res.ok) {
+        if (typeof data.error === "object" && data.error !== null) {
+          const messages = Object.values(data.error).flat().join(" ");
+          setError(messages || "Signup failed");
+        } else {
+          setError(data.error || "Signup failed");
         }
       } else {
-        setError(data.error || "Signup failed");
+        // success case
       }
     } catch (err) {
       setError(err.message || "An error occurred. Please try again.");
