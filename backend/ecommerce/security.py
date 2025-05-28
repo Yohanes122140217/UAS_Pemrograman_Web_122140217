@@ -1,55 +1,7 @@
-# from pyramid.response import Response
-# from pyramid.httpexceptions import HTTPFound
-# import jwt
-
-# def cors_tween_factory(handler, registry):
-#     def cors_tween(request):
-#         if request.method == 'OPTIONS':
-#             response = Response()
-#             response.status = 200
-#         else:
-#             response = handler(request)
-#         response.headers.update({
-#             'Access-Control-Allow-Origin': '*',
-#             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-#             'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-#         })
-#         # Handle OPTIONS preflight requests
-#         return response
-#     return cors_tween
-
-
-# JWT_SECRET = "Merchant_Secret"
-
-# # Middleware to check if the user is authenticated
-# def is_authenticated(request):
-#     """Check if the user is authenticated by verifying the JWT token"""
-#     auth_token = request.headers.get('Authorization')
-#     # Check if the Authorization header is present
-    
-#     if auth_token:
-#         try:
-#             token = auth_token.split(' ')[1]  # 'Bearer <token>'
-#             decoded = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-#             return True  # User is authenticated
-#         except jwt.ExpiredSignatureError:
-#             return False  # Token has expired
-#         except jwt.InvalidTokenError:
-#             return False  # Invalid token
-#     return False  # No token found
-
-# def prevent_logged_in_user(handler, registry):
-#     """Middleware to prevent logged-in users from accessing signup/login pages"""
-#     def wrapper(request):
-#         if is_authenticated(request) and request.path in ['/login','/signup']:
-#             # If the user is authenticated, redirect them to the home page or dashboard
-#             return HTTPFound(location='/')  # Redirect to home or any other page
-#         return handler(request)
-#     return wrapper
-
 # security.py
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPFound
+from pyramid.request import Request
+from pyramid.httpexceptions import HTTPFound, HTTPUnauthorized
 import jwt
 
 JWT_SECRET = "Merchant_Secret"
@@ -63,13 +15,12 @@ def cors_tween_factory(handler, registry):
         response.headers.update({
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Allow-Headers': 'Origin, Content-Type, Authorization',
         })
         return response
     return cors_tween
 
 def is_authenticated(request):
-    """Return True if the Authorization: Bearer <token> header is valid."""
     auth = request.headers.get('Authorization')
     if not auth:
         return False
@@ -83,10 +34,6 @@ def is_authenticated(request):
         return False
 
 def prevent_logged_in_user_tween_factory(handler, registry):
-    """
-    Pyramid tween that intercepts requests to 'login' or 'signup'
-    and redirects to 'home' if already authenticated.
-    """
     def tween(request):
         # get the matched route object (or None)
         route = getattr(request, 'matched_route', None)
@@ -99,3 +46,20 @@ def prevent_logged_in_user_tween_factory(handler, registry):
 
         return handler(request)
     return tween
+
+def get_user_id_from_jwt(request: Request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPUnauthorized("Missing or invalid Authorization header")
+
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        user_id = payload.get("user_id")  # or however you encode user id in token
+        if not user_id:
+            raise HTTPUnauthorized("Invalid token payload: user_id missing")
+        return user_id
+    except jwt.ExpiredSignatureError:
+        raise HTTPUnauthorized("Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPUnauthorized("Invalid token")

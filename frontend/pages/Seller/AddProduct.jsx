@@ -172,7 +172,10 @@ export default function AddProductForm() {
       // Submit to your backend API
       const response = await fetch('http://localhost:6543/api/products', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+         },
         body: JSON.stringify(productData),
       });
 

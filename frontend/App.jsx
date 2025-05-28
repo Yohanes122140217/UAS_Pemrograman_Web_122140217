@@ -6,6 +6,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 
 import HomePage from './pages/Home/Page'
+import HomePage2 from './pages/Home/Page2'
 import CategoriesPage from './pages/Categories/Page'
 import ProductPage from './pages/Product/Page'
 import FlashSalePage from './pages/FlashSale/Page'
@@ -20,8 +21,9 @@ import SignUpPage from './pages/SignUp/Page'
 import LoginPage from './pages/Login/Page'
 import LogoutPage from './pages/Logout/Page'
 import Test from './test/Page'
-import HomePage2 from './pages/Home/Page2'
 import AddProductForm from './pages/Seller/AddProduct'
+// import { IKContext } from 'imagekitio-react'
+import { ImageKitProvider } from '@imagekit/react'
 
 // simple token check
 const isAuthenticated = () => Boolean(localStorage.getItem('token'))
@@ -40,10 +42,15 @@ export default function App() {
   return (
     <BrowserRouter>
       <Navbar />
-
+      {/* <IKContext
+        publicKey="public_/G/t0frWoOsGqqQ4fpDh0o8KfiY="
+        urlEndpoint="https://ik.imagekit.io/wc6bpahhv"
+        transformationPosition="path"
+      > */}
+      <ImageKitProvider urlEndpoint="https://ik.imagekit.io/wc6bpahhv">
       <Routes>
         {/* Public pages */}
-        <Route path="/" element={<HomePage />} />
+        {/* <Route path="/" element={<HomePage />} /> */}
         <Route path="/2" element={<HomePage2/>}/>
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/product/:id" element={<ProductPage />} />
@@ -101,7 +108,8 @@ export default function App() {
         {/* 404 Fallback */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-
+      </ImageKitProvider>
+      {/* </IKContext> */}
       <Footer />
     </BrowserRouter>
   )

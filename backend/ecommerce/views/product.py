@@ -1,11 +1,14 @@
 # backend/ecommerce/views/product.py
 import json
+from ..models.user import User
 from pyramid.view import view_config
 from pyramid.response import Response
 from ..models.meta import DBSession
 from ..models.product import Product
 from ..schemas.product import ProductSchema
 from marshmallow import ValidationError
+from pyramid.httpexceptions import HTTPUnauthorized
+from ..security import get_user_id_from_jwt
 
 @view_config(route_name='create_product', renderer='json', request_method='POST')
 def create_product(request):
@@ -16,7 +19,13 @@ def create_product(request):
         # Parse and validate the data with Marshmallow
         data = request.json_body
         product_data = ProductSchema().load(data)  # Deserialize and validate data
-
+        
+        user_id = get_user_id_from_jwt(request)
+        user = DBSession.query(User).get(user_id)
+        if not user:
+            return HTTPUnauthorized(json_body={'error': 'User not authenticated'})
+        
+        product_data['seller'] = user.username
         # Create a new product object and save to DB
         product = Product(**product_data)
         DBSession.add(product)
@@ -29,17 +38,19 @@ def create_product(request):
         # If validation fails, print the errors and return them to the frontend
         print("Validation error:", err.messages)
         return Response(
-            json.dumps({'errors': err.messages}),
+            body=json.dumps({'errors': err.messages}),
             status=400,
-            content_type='application/json'
+            content_type='application/json',
+            charset='utf-8'
         )
     except Exception as e:
         # General exception handling
         print("Error:", str(e))
         return Response(
-            json.dumps({'error': 'An error occurred while adding the product.'}),
+            body=json.dumps({'error': 'An error occurred while adding the product.'}),
             status=500,
-            content_type='application/json'
+            content_type='application/json',
+            charset='utf-8'
         )
 
 
@@ -59,6 +70,7 @@ def products_api_view(request):
             'image': p.image_url or '/api/placeholder/300/200',
             'rating': p.rating,
             'sold': p.sold,
+            'seller' : p.seller
         })
 
     return result

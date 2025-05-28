@@ -57,8 +57,11 @@ function LoginPage() {
       if (res.ok && data.token) {
         // 2️⃣ store under the same key the rest of your app checks
         localStorage.setItem("token", data.token);
+        localStorage.setItem('username', data.username);
         setMessage("Login successful!");
         navigate("/", { replace: true });
+        console.log("token", data.token);
+        console.log("username", data.username)
       } else {
         setError(data.error || "Login failed");
       }
