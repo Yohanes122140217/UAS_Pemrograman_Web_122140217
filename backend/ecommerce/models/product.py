@@ -9,7 +9,7 @@ class Product(Base):
     id             = Column(Integer, primary_key=True)
     name           = Column(String(255), nullable=False)
     seller         = Column(String(255), nullable=False)
-    description    = Column(Text, nullable=True)
+    description    = Column(Text, nullable=False)
     price          = Column(Float, nullable=False)
     original_price = Column(Float, nullable=True)
     image_url      = Column(String(512), nullable=True)  # Image URL

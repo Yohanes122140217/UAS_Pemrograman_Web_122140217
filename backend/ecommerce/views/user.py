@@ -35,6 +35,8 @@ def signup_view(request):
             (User.email == attrs['email'])
         ).first():
             raise IntegrityError(None, None, None)
+        
+        
         user = User(
             username=attrs['username'],
             email=attrs['email'],

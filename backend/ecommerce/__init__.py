@@ -15,7 +15,7 @@ def main(global_config, **settings):
     Base.metadata.bind = engine
 
     # Tweens: CORS and block logged-in users from login/signup
-    config.add_tween('ecommerce.security.cors_tween_factory', over=None)
+    config.add_tween('ecommerce.security.cors_tween_factory')
     config.add_tween('ecommerce.security.prevent_logged_in_user_tween_factory')
 
     config.include('pyramid_tm')
@@ -31,9 +31,14 @@ def main(global_config, **settings):
     config.add_route('create_product', '/api/products')
     config.add_route('get_products', '/api/get-products')
     config.add_route('imagekit_auth', '/api/imagekit/auth')
+    config.add_route('get_product_detail', '/api/products/{product_id}')
+    # Seller
+    config.add_route('get_seller_products', '/api/seller/products')
+
 
     config.add_renderer('json', JSON())
 
-
+    # from .views import product
     config.scan()
+
     return config.make_wsgi_app()

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Bell, Package, DollarSign, Users, PieChart, Settings, HelpCircle, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 // Sample data for the sales chart
 const salesData = [
@@ -20,14 +21,6 @@ const recentOrders = [
   { id: '#1235', customer: 'Sarah Lee', date: '2025-05-11', total: '$124.50', status: 'Processing' },
   { id: '#1236', customer: 'Mike Chen', date: '2025-05-10', total: '$49.99', status: 'Delivered' },
   { id: '#1237', customer: 'Emma Wilson', date: '2025-05-09', total: '$89.99', status: 'Pending' },
-];
-
-// Sample product data
-const products = [
-  { id: 1, name: 'College Notebook Pro', stock: 28, price: '$24.99', sales: 125 },
-  { id: 2, name: 'Wireless Earbuds', stock: 14, price: '$59.99', sales: 87 },
-  { id: 3, name: 'Backpack XL', stock: 32, price: '$74.99', sales: 63 },
-  { id: 4, name: 'Water Bottle 750ml', stock: 8, price: '$19.99', sales: 54 },
 ];
 
 export default function SellerPage() {
@@ -209,14 +202,49 @@ function DashboardTab() {
 }
 
 function ProductsTab() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("You are not logged in.");
+      setLoading(false);
+      return;
+    }
+
+    fetch("http://localhost:6543/api/seller/products", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch products");
+        return res.json();
+      })
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch((e) => {
+        setError(e.message);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <p>Loading products...</p>;
+  if (error) return <p className="text-red-600">Error: {error}</p>;
+  if (products.length === 0) return <p className="text-gray-500">No products found.</p>;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Products</h1>
         <button
           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-          onClick={() => navigate('/add-product')}  // <-- Navigate on click
+          onClick={() => navigate("/add-product")}
         >
           Add New Product
         </button>
@@ -224,12 +252,13 @@ function ProductsTab() {
 
       <div className="flex justify-between bg-white p-4 rounded-lg shadow">
         <div className="flex space-x-2">
-          <input 
-            type="text" 
-            placeholder="Search products..." 
+          <input
+            type="text"
+            placeholder="Search products..."
             className="px-4 py-2 border rounded-lg w-64"
+            disabled
           />
-          <select className="px-4 py-2 border rounded-lg">
+          <select className="px-4 py-2 border rounded-lg" disabled>
             <option>All Categories</option>
             <option>Electronics</option>
             <option>Books</option>
@@ -239,7 +268,7 @@ function ProductsTab() {
         </div>
         <div className="flex items-center space-x-2">
           <span className="text-sm text-gray-500">Sort by:</span>
-          <select className="px-4 py-2 border rounded-lg">
+          <select className="px-4 py-2 border rounded-lg" disabled>
             <option>Best Selling</option>
             <option>Price: Low to High</option>
             <option>Price: High to Low</option>
@@ -260,12 +289,21 @@ function ProductsTab() {
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
               {products.map((product) => (
                 <tr key={product.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md"></div>
+                      <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md overflow-hidden">
+                        {product.image && (
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover rounded-md"
+                          />
+                        )}
+                      </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
                         <div className="text-sm text-gray-500">SKU: PRD-{product.id}0{product.id}</div>
@@ -273,12 +311,12 @@ function ProductsTab() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`text-sm ${product.stock < 10 ? 'text-red-600' : 'text-gray-700'}`}>
-                      {product.stock} units
+                    <span className={`text-sm ${product.stock < 10 ? "text-red-600" : "text-gray-700"}`}>
+                      {product.stock ?? 0} units
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.price}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.sales}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${product.price}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.sold ?? 0}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button className="text-blue-600 hover:text-blue-900">Edit</button>
@@ -288,17 +326,8 @@ function ProductsTab() {
                 </tr>
               ))}
             </tbody>
+
           </table>
-        </div>
-        <div className="px-6 py-4 border-t flex items-center justify-between">
-          <div className="text-sm text-gray-500">
-            Showing 1 to 4 of 4 entries
-          </div>
-          <div className="flex space-x-2">
-            <button className="px-3 py-1 border rounded-md bg-gray-50">Previous</button>
-            <button className="px-3 py-1 border rounded-md bg-red-600 text-white">1</button>
-            <button className="px-3 py-1 border rounded-md bg-gray-50">Next</button>
-          </div>
         </div>
       </div>
     </div>

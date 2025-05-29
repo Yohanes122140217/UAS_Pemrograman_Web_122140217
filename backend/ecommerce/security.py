@@ -55,7 +55,7 @@ def get_user_id_from_jwt(request: Request):
     token = auth_header.split(" ")[1]
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        user_id = payload.get("user_id")  # or however you encode user id in token
+        user_id = payload.get("user_id")  # Ensure this field matches your JWT payload
         if not user_id:
             raise HTTPUnauthorized("Invalid token payload: user_id missing")
         return user_id

@@ -9,6 +9,7 @@ from ..schemas.product import ProductSchema
 from marshmallow import ValidationError
 from pyramid.httpexceptions import HTTPUnauthorized
 from ..security import get_user_id_from_jwt
+from sqlalchemy import cast, String
 
 @view_config(route_name='create_product', renderer='json', request_method='POST')
 def create_product(request):
@@ -71,6 +72,76 @@ def products_api_view(request):
             'rating': p.rating,
             'sold': p.sold,
             'seller' : p.seller
+        })
+
+    return result
+
+
+
+def get_product_by_id(request, product_id):
+    product = request.dbsession.query(Product).filter(Product.id == int(product_id)).first()
+    if product:
+        return product.to_dict()
+    return None
+
+
+
+@view_config(route_name='get_product_detail', renderer='json', request_method='GET')
+def product_detail_api_view(request):
+    product_id = request.matchdict.get('product_id')
+
+    product = DBSession.query(Product).filter(Product.id == int(product_id)).first()
+
+    if not product:
+        request.response.status = 404
+        return {"error": "Product not found"}
+
+    return {
+        'id': product.id,
+        'name': product.name,
+        'price': product.price,
+        'originalPrice': product.original_price,
+        'image': product.image_url or '/api/placeholder/300/200',
+        'rating': product.rating,
+        'sold': product.sold,
+        'seller': product.seller,
+        'description': product.description
+    }
+
+
+# NEW
+
+@view_config(route_name='get_seller_products', renderer='json', request_method='GET')
+def get_seller_products(request):
+    user_id = get_user_id_from_jwt(request)
+    if not user_id:
+        return HTTPUnauthorized(json_body={"error": "Unauthorized"})
+
+    user = DBSession.query(User).get(user_id)
+    if not user:
+        return HTTPUnauthorized(json_body={"error": "User not found"})
+
+    username = user.username
+    print(f"DEBUG: User ID from token: {user_id}")
+    print(f"DEBUG: Username from DB: '{username}' (len={len(username)})")
+
+    # Query products by seller username exactly
+    products = DBSession.query(Product).filter(Product.seller == username).all()
+
+    print(f"DEBUG: Number of products found: {len(products)}")
+    for p in products:
+        print(f"DEBUG: Product ID={p.id}, Seller='{p.seller}', Name='{p.name}'")
+
+    result = []
+    for p in products:
+        result.append({
+            'id': p.id,
+            'name': p.name,
+            'price': p.price,
+            'image': p.image_url or '/api/placeholder/300/200',
+            'rating': p.rating,
+            'sold': p.sold,
+            'seller': p.seller
         })
 
     return result

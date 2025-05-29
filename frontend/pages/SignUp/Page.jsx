@@ -59,7 +59,8 @@ function SignUpPage() {
           setError(data.error || "Signup failed");
         }
       } else {
-        // success case
+        setSuccess(true);               // Set success to true
+        setMessage("Account created successfully!")
       }
     } catch (err) {
       setError(err.message || "An error occurred. Please try again.");
