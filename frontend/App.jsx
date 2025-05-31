@@ -21,7 +21,10 @@ import LoginPage from './pages/Login/Page'
 import LogoutPage from './pages/Logout/Page'
 import Test from './test/Page'
 import AddProductForm from './pages/Seller/AddProduct'
+import ProductEdit from './pages/Seller/ProductEdit'
+
 import { ImageKitProvider } from '@imagekit/react'
+
 
 // simple token check
 const isAuthenticated = () => Boolean(localStorage.getItem('token'))
@@ -53,6 +56,8 @@ export default function App() {
         <Route path="/add-product" element={<AddProductForm />} />
         <Route path="/help" element={<HelpPage />} />
         <Route path="/test" element={<Test />} />
+        <Route path="/edit-product/:productId" element={<ProductEdit />} />
+
 
         {/* Guest‐only */}
         <Route

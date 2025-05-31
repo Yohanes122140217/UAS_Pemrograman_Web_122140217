@@ -15,3 +15,4 @@ class Product(Base):
     image_url      = Column(String(512), nullable=True)  # Image URL
     rating         = Column(Float, default=0.0)
     sold           = Column(Integer, default=0)
+    stock          = Column(Integer, default=0)

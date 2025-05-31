@@ -7,9 +7,10 @@ from ..models.meta import DBSession
 from ..models.product import Product
 from ..schemas.product import ProductSchema
 from marshmallow import ValidationError
-from pyramid.httpexceptions import HTTPUnauthorized
+from pyramid.httpexceptions import HTTPUnauthorized, HTTPForbidden, HTTPNotFound, HTTPNoContent
 from ..security import get_user_id_from_jwt
 from sqlalchemy import cast, String
+from sqlalchemy.exc import SQLAlchemyError
 
 @view_config(route_name='create_product', renderer='json', request_method='POST')
 def create_product(request):
@@ -71,7 +72,8 @@ def products_api_view(request):
             'image': p.image_url or '/api/placeholder/300/200',
             'rating': p.rating,
             'sold': p.sold,
-            'seller' : p.seller
+            'seller' : p.seller,
+            'stock' : p.stock
         })
 
     return result
@@ -105,11 +107,10 @@ def product_detail_api_view(request):
         'rating': product.rating,
         'sold': product.sold,
         'seller': product.seller,
-        'description': product.description
+        'description': product.description,
+        'stock': product.stock
     }
 
-
-# NEW
 
 @view_config(route_name='get_seller_products', renderer='json', request_method='GET')
 def get_seller_products(request):
@@ -141,7 +142,114 @@ def get_seller_products(request):
             'image': p.image_url or '/api/placeholder/300/200',
             'rating': p.rating,
             'sold': p.sold,
-            'seller': p.seller
+            'seller': p.seller,
+            'stock': p.stock
         })
 
     return result
+
+
+# NEW
+
+
+@view_config(route_name='edit_product', renderer='json', request_method='PUT')
+def edit_product(request):
+    product_id = request.matchdict.get('product_id')
+    try:
+        user_id = get_user_id_from_jwt(request)
+        if not user_id:
+            return HTTPUnauthorized(json_body={'error': 'Authentication required'})
+
+        user = DBSession.query(User).get(user_id)
+        if not user:
+            return HTTPUnauthorized(json_body={'error': 'User not found'})
+
+        product = DBSession.query(Product).filter(Product.id == int(product_id)).first()
+        if not product:
+            return HTTPNotFound(json_body={'error': 'Product not found'})
+
+        if product.seller != user.username:
+            return HTTPForbidden(json_body={'error': 'You are not authorized to edit this product'})
+
+        data = request.json_body
+        product_data = ProductSchema().load(data, partial=True)
+
+        for key, value in product_data.items():
+            setattr(product, key, value)
+
+        DBSession.flush() # Commit changes to the database
+        return ProductSchema().dump(product)
+
+    except ValidationError as err:
+        return Response(
+            body=json.dumps({'errors': err.messages}),
+            status=400,
+            content_type='application/json',
+            charset='utf-8'
+        )
+    except SQLAlchemyError as e:
+        DBSession.rollback() # Rollback in case of DB error
+        return Response(
+            body=json.dumps({'error': 'A database error occurred while updating the product.'}),
+            status=500,
+            content_type='application/json',
+            charset='utf-8'
+        )
+    except Exception as e:
+        return Response(
+            body=json.dumps({'error': 'An unexpected error occurred while updating the product.'}),
+            status=500,
+            content_type='application/json',
+            charset='utf-8'
+        )
+
+
+# NEW
+
+@view_config(route_name='delete_product', renderer='json', request_method='DELETE')
+def delete_product(request):
+    product_id = request.matchdict.get('product_id')
+    print(f"DEBUG: DELETE request received for product ID: {product_id}") # ADD THIS
+
+    try:
+        # ... (your existing auth logic) ...
+
+        # Check the parsed product_id type and value
+        try:
+            int_product_id = int(product_id)
+            print(f"DEBUG: Parsed product_id as integer: {int_product_id}") # ADD THIS
+        except ValueError:
+            print(f"ERROR: product_id '{product_id}' is not a valid integer.")
+            return Response(
+                body=json.dumps({'error': 'Invalid product ID format.'}),
+                status=400,
+                content_type='application/json',
+                charset='utf-8'
+            )
+
+        # 2. Fetch the existing product
+        product = DBSession.query(Product).filter(Product.id == int_product_id).first() # Use int_product_id
+        if not product:
+            print(f"DEBUG: Product with ID {int_product_id} not found in DB.") # ADD THIS
+            return HTTPNotFound(json_body={'error': 'Product not found'}) # Ensure json_body is set
+
+        # ... (rest of your logic) ... used for successful DELETE requests where no content is returned.
+        return HTTPNoContent()
+
+    except SQLAlchemyError as e:
+        DBSession.rollback() # Rollback in case of DB error
+        print(f"Database error during product deletion: {e}")
+        return Response(
+            body=json.dumps({'error': 'A database error occurred while deleting the product.'}),
+            status=500,
+            content_type='application/json',
+            charset='utf-8'
+        )
+    except Exception as e:
+        print(f"General error during product deletion: {e}")
+        return Response(
+            body=json.dumps({'error': 'An unexpected error occurred while deleting the product.'}),
+            status=500,
+            content_type='application/json',
+            charset='utf-8'
+        )

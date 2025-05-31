@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Bell, Package, DollarSign, Users, PieChart, Settings, HelpCircle, ChevronDown } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import ProductsTab from './ProductsTab';
+import SettingsPanel from './SettingsPanel';
 
 // Sample data for the sales chart
 const salesData = [
@@ -34,6 +35,8 @@ export default function SellerPage() {
         return <ProductsTab />;
       case 'orders':
         return <OrdersTab />;
+      case 'setting':
+        return <SettingsPanel/>
       default:
         return <DashboardTab />;
     }
@@ -97,7 +100,8 @@ function SideNavigation({ activeTab, setActiveTab }) {
             </button>
           </li>
           <li>
-            <button 
+            <button
+              onClick={() => setActiveTab('setting')}
               className="flex items-center w-full p-3 rounded-lg hover:bg-red-600"
             >
               <Settings size={18} className="mr-3" />
@@ -200,140 +204,6 @@ function DashboardTab() {
     </div>
   );
 }
-
-function ProductsTab() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("You are not logged in.");
-      setLoading(false);
-      return;
-    }
-
-    fetch("http://localhost:6543/api/seller/products", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch products");
-        return res.json();
-      })
-      .then((data) => {
-        setProducts(data);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
-      });
-  }, []);
-
-  if (loading) return <p>Loading products...</p>;
-  if (error) return <p className="text-red-600">Error: {error}</p>;
-  if (products.length === 0) return <p className="text-gray-500">No products found.</p>;
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Products</h1>
-        <button
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-          onClick={() => navigate("/add-product")}
-        >
-          Add New Product
-        </button>
-      </div>
-
-      <div className="flex justify-between bg-white p-4 rounded-lg shadow">
-        <div className="flex space-x-2">
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="px-4 py-2 border rounded-lg w-64"
-            disabled
-          />
-          <select className="px-4 py-2 border rounded-lg" disabled>
-            <option>All Categories</option>
-            <option>Electronics</option>
-            <option>Books</option>
-            <option>Stationery</option>
-            <option>Furniture</option>
-          </select>
-        </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-500">Sort by:</span>
-          <select className="px-4 py-2 border rounded-lg" disabled>
-            <option>Best Selling</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
-            <option>Newest</option>
-          </select>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-left bg-gray-50 border-b">
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Sales</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody className="bg-white divide-y divide-gray-200">
-              {products.map((product) => (
-                <tr key={product.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-md overflow-hidden">
-                        {product.image && (
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="w-full h-full object-cover rounded-md"
-                          />
-                        )}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">SKU: PRD-{product.id}0{product.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`text-sm ${product.stock < 10 ? "text-red-600" : "text-gray-700"}`}>
-                      {product.stock ?? 0} units
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${product.price}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{product.sold ?? 0}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">Edit</button>
-                      <button className="text-red-600 hover:text-red-900">Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function OrdersTab() {
   return (
     <div className="space-y-6">

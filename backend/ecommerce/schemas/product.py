@@ -11,3 +11,4 @@ class ProductSchema(Schema):
     image_url      = fields.Str(allow_none=True)
     rating         = fields.Float(allow_none=True)
     sold           = fields.Int(allow_none=True)
+    stock          = fields.Int(allow_none=True)

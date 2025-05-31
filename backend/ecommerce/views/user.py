@@ -3,16 +3,18 @@ import json
 import jwt
 from datetime import datetime, timedelta
 
+from ..views import imagekit
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPFound, HTTPBadRequest, HTTPUnauthorized
-from sqlalchemy.exc import IntegrityError
+from pyramid.httpexceptions import HTTPFound, HTTPNoContent, HTTPUnauthorized
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from marshmallow import ValidationError
 
 from ..models.meta import DBSession
 from ..models.user import User
-from ..schemas.user import UserSignupSchema, UserLoginSchema
-from ..security import is_authenticated, JWT_SECRET
+from ..models.product import Product
+from ..schemas.user import UserSignupSchema, UserLoginSchema, UserUpdatePasswordSchema, UserSchema
+from ..security import is_authenticated, JWT_SECRET, get_user_id_from_jwt
 
 
 def create_jwt_token(user_id):
@@ -90,7 +92,184 @@ def login_view(request):
             content_type='application/json',
             charset='utf-8'
         )
-    # Optional cleaner version using HTTP exceptions:
-    # except ValidationError as ve:
-    #     raise HTTPBadRequest(json_body={"error": ve.messages})
-    # return HTTPUnauthorized(json_body={"error": "Invalid email or password"})
+    
+
+# NEW
+
+@view_config(route_name='get_user_profile', renderer='json', request_method='GET')
+def get_user_profile(request):
+    print("DEBUG: get_user_profile view hit!") # <--- ADD THIS
+    user_id = get_user_id_from_jwt(request)
+    if not user_id:
+        print("DEBUG: User not authenticated for profile fetch.") # <--- ADD THIS
+        return HTTPUnauthorized(json_body={'error': 'Authentication required'})
+
+    user = DBSession.query(User).get(user_id)
+    if not user:
+        print(f"DEBUG: User with ID {user_id} not found in DB during profile fetch.") # <--- ADD THIS
+        return HTTPUnauthorized(json_body={'error': 'User not found'})
+
+    print(f"DEBUG: User profile for {user.username} fetched successfully.") # <--- ADD THIS
+    return UserSchema().dump(user)
+
+
+
+@view_config(route_name='update_user_profile', renderer='json', request_method='PUT')
+def update_user_profile(request):
+    user_id = get_user_id_from_jwt(request)
+    if not user_id:
+        return HTTPUnauthorized(json_body={'error': 'Authentication required'})
+
+    user = DBSession.query(User).get(user_id)
+    if not user:
+        return HTTPUnauthorized(json_body={'error': 'User not found'})
+
+    try:
+        data = request.json_body
+        # Use partial=True to allow updating only a subset of fields
+        updated_data = UserSchema(partial=True).load(data)
+
+        # Check for duplicate username or email if they are being updated
+        if 'username' in updated_data and updated_data['username'] != user.username:
+            if DBSession.query(User).filter(User.username == updated_data['username']).first():
+                return Response(
+                    body=json.dumps({'errors': {'username': ['Username already taken.']}}),
+                    status=409, # 409 Conflict indicates a duplicate resource
+                    content_type='application/json'
+                )
+        if 'email' in updated_data and updated_data['email'] != user.email:
+            if DBSession.query(User).filter(User.email == updated_data['email']).first():
+                return Response(
+                    body=json.dumps({'errors': {'email': ['Email already taken.']}}),
+                    status=409,
+                    content_type='application/json'
+                )
+
+        # Apply updates to the user object
+        for key, value in updated_data.items():
+            setattr(user, key, value)
+        
+        DBSession.flush() # Commit changes to the database
+        return UserSchema().dump(user)
+
+    except ValidationError as err:
+        return Response(
+            body=json.dumps({'errors': err.messages}),
+            status=400, # 400 Bad Request for validation errors
+            content_type='application/json',
+            charset='utf-8'
+        )
+    except SQLAlchemyError as e:
+        DBSession.rollback() # Rollback on database error
+        print(f"Database error during user profile update: {e}")
+        return Response(
+            body=json.dumps({'error': 'A database error occurred while updating your profile.'}),
+            status=500, # 500 Internal Server Error for DB issues
+            content_type='application/json',
+            charset='utf-8'
+        )
+    except Exception as e:
+        print(f"General error during user profile update: {e}")
+        return Response(
+            body=json.dumps({'error': 'An unexpected error occurred while updating your profile.'}),
+            status=500,
+            content_type='application/json',
+            charset='utf-8'
+        )
+
+
+@view_config(route_name='update_user_password', renderer='json', request_method='PUT')
+def update_user_password(request):
+    user_id = get_user_id_from_jwt(request)
+    if not user_id:
+        return HTTPUnauthorized(json_body={'error': 'Authentication required'})
+
+    user = DBSession.query(User).get(user_id)
+    if not user:
+        return HTTPUnauthorized(json_body={'error': 'User not found'})
+
+    try:
+        data = request.json_body
+        attrs = UserUpdatePasswordSchema().load(data)
+        # Verify current password using the method in your User model
+        if not user.verify_password(attrs['current_password']):
+            return Response(
+                body=json.dumps({'errors': {'current_password': ['Invalid current password.']}}),
+                status=401, # 401 Unauthorized for incorrect credentials
+                content_type='application/json',
+                charset='utf-8'
+            )
+        
+        # Hash and update new password
+        user.password = User.hash_password(attrs['new_password'])
+        DBSession.flush()
+        return {'message': 'Password updated successfully.'}
+
+    except ValidationError as err:
+        return Response(
+            body=json.dumps({'errors': err.messages}),
+            status=400,
+            content_type='application/json',
+            charset='utf-8'
+        )
+    except SQLAlchemyError as e:
+        DBSession.rollback()
+        print(f"Database error during password update: {e}")
+        return Response(
+            body=json.dumps({'error': 'A database error occurred while updating your password.'}),
+            status=500,
+            content_type='application/json',
+            charset='utf-8'
+        )
+    except Exception as e:
+        print(f"General error during password update: {e}")
+        return Response(
+            body=json.dumps({'error': 'An unexpected error occurred while updating your password.'}),
+            status=500,
+            content_type='application/json',
+            charset='utf-8'
+        )
+
+
+
+@view_config(route_name='delete_account', renderer='json', request_method='DELETE')
+def delete_account(request):
+    user_id = get_user_id_from_jwt(request)
+    if not user_id:
+        return HTTPUnauthorized(json_body={'error': 'Authentication required'})
+
+    user = DBSession.query(User).get(user_id)
+    if not user:
+        return HTTPUnauthorized(json_body={'error': 'User not found'})
+
+    try:
+        products_to_delete = DBSession.query(Product).filter(Product.seller == user.username).all()
+        for product in products_to_delete:
+            if product.imagekit_file_id:
+                try:
+                    imagekit.delete_file(product.imagekit_file_id)
+                    print(f"ImageKit image {product.imagekit_file_id} deleted for product {product.id}.")
+                except Exception as ik_err:
+                    print(f"WARNING: Failed to delete ImageKit image {product.imagekit_file_id} during account deletion: {ik_err}")
+            DBSession.delete(product) # Delete the product record from your DB
+        DBSession.flush() # Flush product deletions before user deletion to avoid foreign key issues
+
+        DBSession.delete(user) # Delete the user record itself
+        DBSession.flush()
+        return HTTPNoContent() # 204 No Content for successful deletion
+
+    except SQLAlchemyError as e:
+        DBSession.rollback() # Rollback on database error
+        return Response(
+            body=json.dumps({'error': 'A database error occurred while deleting your account.'}),
+            status=500,
+            content_type='application/json',
+            charset='utf-8'
+        )
+    except Exception as e:
+        return Response(
+            body=json.dumps({'error': 'An unexpected error occurred while deleting your account.'}),
+            status=500,
+            content_type='application/json',
+            charset='utf-8'
+        )

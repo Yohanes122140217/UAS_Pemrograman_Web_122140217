@@ -4,7 +4,7 @@ from pyramid.request import Request
 from pyramid.httpexceptions import HTTPFound, HTTPUnauthorized
 import jwt
 
-JWT_SECRET = "Merchant_Secret"
+JWT_SECRET = "Jawa TUlen"
 
 def cors_tween_factory(handler, registry):
     def cors_tween(request):

@@ -1,5 +1,3 @@
-
-
 # imagekit.py in your Pyramid backend
 from pyramid.view import view_config
 from imagekitio import ImageKit

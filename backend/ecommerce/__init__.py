@@ -20,22 +20,28 @@ def main(global_config, **settings):
 
     config.include('pyramid_tm')
 
-    # Routes
+    # User
     config.add_route('home', '/')
     config.add_route('login', '/login')
     config.add_route('signup', '/signup')
-    # config.add_route('image_upload_auth', '/api/imagekit/auth')
-    # … other routes …
+    config.add_route('get_user_profile', '/api/user/profile', request_method='GET')
+    config.add_route('update_user_profile', '/api/user/profile', request_method='PUT')
+    config.add_route('update_user_password', '/api/user/password', request_method='PUT')
+    config.add_route('delete_account', '/api/user/account', request_method='DELETE')
 
     # ImageKit routes
-    config.add_route('create_product', '/api/products')
-    config.add_route('get_products', '/api/get-products')
     config.add_route('imagekit_auth', '/api/imagekit/auth')
-    config.add_route('get_product_detail', '/api/products/{product_id}')
+
+    # Products
+    config.add_route('create_product', '/api/products', request_method='POST')
+    config.add_route('get_products', '/api/get-products', request_method='GET')
+    config.add_route('get_product_detail', '/api/products/{product_id}', request_method='GET')
+    config.add_route('edit_product', '/api/products/{product_id}', request_method='PUT')
+    config.add_route('delete_product', '/api/products/{product_id}', request_method='DELETE')
+    
     # Seller
     config.add_route('get_seller_products', '/api/seller/products')
-
-
+    
     config.add_renderer('json', JSON())
 
     # from .views import product
