@@ -12,3 +12,4 @@ class ProductSchema(Schema):
     rating         = fields.Float(allow_none=True)
     sold           = fields.Int(allow_none=True)
     stock          = fields.Int(allow_none=True)
+    # category       = fields.Str(allow_none=True)

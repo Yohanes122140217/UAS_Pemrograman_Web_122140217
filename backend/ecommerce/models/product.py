@@ -16,3 +16,4 @@ class Product(Base):
     rating         = Column(Float, default=0.0)
     sold           = Column(Integer, default=0)
     stock          = Column(Integer, default=0)
+    # category       = Column(String(100), nullable=True, index=True)

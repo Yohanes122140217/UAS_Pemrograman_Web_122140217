@@ -22,6 +22,7 @@ import LogoutPage from './pages/Logout/Page'
 import Test from './test/Page'
 import AddProductForm from './pages/Seller/AddProduct'
 import ProductEdit from './pages/Seller/ProductEdit'
+import SearchPage from './pages/Search/Page';
 
 import { ImageKitProvider } from '@imagekit/react'
 
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="/seller" element={<SellerPage />} />
         <Route path="/add-product" element={<AddProductForm />} />
         <Route path="/help" element={<HelpPage />} />
+        <Route path="/search" element={<SearchPage />} /> {/* <--- ADD THIS ROUTE */}
         <Route path="/test" element={<Test />} />
         <Route path="/edit-product/:productId" element={<ProductEdit />} />
 

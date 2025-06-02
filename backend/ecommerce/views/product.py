@@ -11,6 +11,8 @@ from pyramid.httpexceptions import HTTPUnauthorized, HTTPForbidden, HTTPNotFound
 from ..security import get_user_id_from_jwt
 from sqlalchemy import cast, String
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import or_
+from sqlalchemy import func
 
 @view_config(route_name='create_product', renderer='json', request_method='POST')
 def create_product(request):
@@ -253,3 +255,41 @@ def delete_product(request):
             content_type='application/json',
             charset='utf-8'
         )
+    
+
+@view_config(route_name='search_products', renderer='json', request_method='GET')
+def search_products_view(request):
+    search_query_param = request.params.get('q', '').strip() # Get 'q' query parameter
+    
+    # For backend debugging:
+    print(f"[SearchView] Received search request. Query parameter 'q': '{search_query_param}'")
+
+    if not search_query_param:
+        print("[SearchView] Search query is empty. Returning empty list.")
+        return [] 
+
+    try:
+        # Prepare for a case-insensitive LIKE search
+        # For PostgreSQL, you can use .ilike()
+        # For SQLite and other DBs, using lower() on both sides is more portable
+        search_term_for_like = f"%{search_query_param.lower()}%"
+        
+        products = DBSession.query(Product).filter(
+            or_(
+                func.lower(Product.name).like(search_term_for_like),
+                func.lower(Product.description).like(search_term_for_like),
+            )
+        ).all()
+        
+        print(f"[SearchView] Found {len(products)} products for query '{search_query_param}'")
+        return ProductSchema(many=True).dump(products)
+
+    except SQLAlchemyError as e:
+        DBSession.rollback()
+        print(f"[SearchView] SQLAlchemyError during product search: {e}")
+        request.response.status = 500
+        return {'error': 'A database error occurred while searching for products.'}
+    except Exception as e:
+        print(f"[SearchView] Unexpected error during product search: {e}")
+        request.response.status = 500
+        return {'error': 'An unexpected error occurred while searching for products.'}
