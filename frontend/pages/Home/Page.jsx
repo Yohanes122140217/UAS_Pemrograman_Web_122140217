@@ -44,7 +44,7 @@ function HomePage() {
     <div className="container mx-auto px-4 py-6">
       {/* Hero Banner */}
       <Banner
-        image="/api/placeholder/1200/400"
+        image="backtoschool.jpg"
         title="Back to School Sale!"
         description="Get up to 50% off on essential items for the new semester. Limited time offer!"
         buttonText="Shop Now"
@@ -86,7 +86,7 @@ function HomePage() {
       {/* Secondary Banner */}
       <div className="mt-10">
         <Banner
-          image="/api/placeholder/1200/300"
+          image="studentdiscount.jpg"
           title="Student Discount Available"
           description="Verify your student status and get an additional 10% off on all purchases!"
           buttonText="Verify Now"

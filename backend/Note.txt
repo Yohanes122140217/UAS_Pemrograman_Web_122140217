@@ -1,0 +1,11 @@
+To install backend modules:
+`pip install requirements.txt`
+
+To make migrations with alembic:
+`alembic revision --autogenerate -m "(Description)"`
+
+To apply migrations:
+`alembic upgrade head`
+
+To run the backend server, do:
+`pserve development.ini`
